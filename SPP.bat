@@ -1,7 +1,7 @@
 @echo off
 cls
 echo [101;93mSetPriority.bat v1.0 - by GabrielWB (08/05/2017)[0m
-echo This script generates two .reg files to permanently set the CPU priority of specific programs
+echo This script generates three .reg files to permanently set the CPU priority of specific programs
 echo Use at your own risk and discretion. No warranties.
 echo:
 
