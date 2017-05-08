@@ -111,9 +111,10 @@ echo [33m======================================================================
 type SPP_undoSettings.reg
 echo [33m========================================================================================[0m
 echo:
-echo [91msetPriority_wipeSettings.reg[0m - To remove ALL CREATED KEYS from your registry
 echo [101;97mWARNING: ONLY USE THIS FILE IF YOU KNOW WHAT YOU ARE DOING![0m 
-echo [91mThis file will delete all created keys and does NOT account for any pre-existing keys![0m
+echo [101;97mThis file will delete ALL created keys and does NOT account for any pre-existing keys![0m
+echo [31m----------------------------------------------------------------------------------------[0m
+echo [91msetPriority_wipeSettings.reg[0m - To remove ALL CREATED KEYS from your registry
 echo [31m========================================================================================[0m
 type SPP_wipeSettings.reg
 echo [31m========================================================================================[0m
