@@ -10,7 +10,7 @@ SET process=nothing
 SET priority=2
 SET priorityName=nothing
 
-:: Create three temporary files and add .reg file header and blank line
+:: Create three temporary files and add default registry file header and blank line
 (echo Windows Registry Editor Version 5.00 & echo:) > plus.temp
 (echo Windows Registry Editor Version 5.00 & echo:) > minus.temp
 (echo Windows Registry Editor Version 5.00 & echo:) > wipe.temp
@@ -20,21 +20,28 @@ SET priorityName=nothing
 echo [93mSET PROGRAM NAME[0m
 echo What is the process name of the program? The correct format is [96mname.exe[0m 
 echo Examples are: [1moverwatch.exe[0m / [1mhl2.exe[0m / [1mcactus.exe[0m / [1mRocketLeague.exe[0m 
-echo Alternatively, type [96mQUIT[0m to end the script.
-SET /p process=
+echo Alternatively, type [96mQ[0m to end the script.
+SET /p process=Process name: 
 echo:
 
-IF process == QUIT (
+:: Check if the user has entered Q to end the script
+IF /I "%process%" == "Q" (
 	GOTO Stop
 )
 
+:: Check if the entered process name ends with .exe
+if "%process:~-4%" neq ".exe" (
+	echo [91mERROR:[0m [96m%process%[0m is not a valid process name. A process needs to end with [96m.exe[0m
+	echo.
+	goto AddProgram
+)
 
 :: Ask user for CPU priority, five possible values
-:: NOTE: Realtime cpu setting cannot be set through the registry and is therefore unavailable.
+:: NOTE: The [1mREALTIME[0m cpu setting cannot be set through the registry and is therefore unavailable.
 echo [93mSET CPU PRIORITY[0m
 echo At which priority should [96m%process%[0m run? Choose a number between [96m(1 - 5)[0m
 echo [1m1. Low[0m / [1m2. Below Normal[0m / [1m3. Normal[0m / [1m4. Above Normal[0m / [1m5. High[0m
-choice /c 12345 /n /m "CPU Priority="
+choice /c 12345 /n /m "CPU Priority= "
 echo:
 
 :: Set priority levels depending on userinput. Values for priority were retreived from CpuPriorityClass documentation
@@ -117,10 +124,10 @@ echo [33m======================================================================
 type SPP_undoSettings.reg
 echo [33m========================================================================================[0m
 echo:
-echo [101;97mWARNING: ONLY USE THIS FILE IF YOU KNOW WHAT YOU ARE DOING![0m 
-echo [101;97mThis file will delete ALL created keys and does NOT account for any pre-existing keys![0m
 echo [31m----------------------------------------------------------------------------------------[0m
 echo [91msetPriority_wipeSettings.reg[0m - To remove ALL CREATED KEYS from your registry
+echo [41;97mWARNING: ONLY USE THIS FILE IF YOU KNOW WHAT YOU ARE DOING![0m 
+echo [41;97mThis file will delete ALL created keys and does NOT account for any pre-existing keys![0m 
 echo [31m========================================================================================[0m
 type SPP_wipeSettings.reg
 echo [31m========================================================================================[0m
