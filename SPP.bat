@@ -18,15 +18,21 @@ SET priorityName=nothing
 :: Ask user for process name
 :AddProgram
 echo [93mSET PROGRAM NAME[0m
-echo What is the process name of the program? The correct format is [1mname.exe[0m 
+echo What is the process name of the program? The correct format is [96mname.exe[0m 
 echo Examples are: [1moverwatch.exe[0m / [1mhl2.exe[0m / [1mcactus.exe[0m / [1mRocketLeague.exe[0m 
+echo Alternatively, type [96mQUIT[0m to end the script.
 SET /p process=
 echo:
+
+IF process == QUIT (
+	GOTO Stop
+)
+
 
 :: Ask user for CPU priority, five possible values
 :: NOTE: Realtime cpu setting cannot be set through the registry and is therefore unavailable.
 echo [93mSET CPU PRIORITY[0m
-echo At which priority should [96m%process%[0m run? Valid levels are:
+echo At which priority should [96m%process%[0m run? Choose a number between [96m(1 - 5)[0m
 echo [1m1. Low[0m / [1m2. Below Normal[0m / [1m3. Normal[0m / [1m4. Above Normal[0m / [1m5. High[0m
 choice /c 12345 /n /m "CPU Priority="
 echo:
@@ -66,7 +72,7 @@ IF ERRORLEVEL == 1 (
 :CheckInput
 :: Asking user to doublecheck input and to confirm if correct. If declined, return to AddProgram
 echo You wish to set the priority of [96m%process%[0m to [96m%priorityString%[0m permanently.
-echo Is this correct? [1m(Y/N)[0m
+echo Is this correct? [96m(Y/N)[0m
 choice /n
 echo:
 
@@ -87,8 +93,8 @@ IF ERRORLEVEL == 1 (
 (echo [-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%process%]) >> wipe.temp
 
 :: Ask user if another program needs to be added to the queue. Return to AddProgram if requested
-echo Adding [96m%process%[0m set to [96m%priorityString%[0m to batch list.
-echo Do you wish to set another program? [1m(Y/N)[0m
+echo The key to set [96m%process%[0m to [96m%priorityString%[0m permanently has been added to the batch list.
+echo Do you wish to set another program? [96m(Y/N)[0m
 choice /n
 echo:
 IF ERRORLEVEL == 2 GOTO GenerateFiles
