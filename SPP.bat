@@ -1,7 +1,8 @@
 @echo off
+:: Clearing window and drawing ~~*FANCY*~~ information header
 cls
 echo [101;93mSetPriority.bat v1.0 - by GabrielWB (08/05/2017)[0m
-echo This script generates three .reg files to permanently set the CPU priority of specific programs
+echo This script generates three .reg files to permanently set the CPU priority of specific programs.
 echo Use at your own risk and discretion. No warranties.
 echo:
 
@@ -15,20 +16,22 @@ SET priorityName=nothing
 (echo Windows Registry Editor Version 5.00 & echo:) > minus.temp
 (echo Windows Registry Editor Version 5.00 & echo:) > wipe.temp
 
-:: Ask user for process name for the first time
 :AddProgram
+:: Ask user for the process name
 echo [93mSET PROGRAM NAME[0m
 echo What is the process name of the program? The correct format is [96mname.exe[0m 
 echo Examples are: [1moverwatch.exe[0m / [1mhl2.exe[0m / [1mcactus.exe[0m / [1mRocketLeague.exe[0m 
-echo Alternatively, type [96mQ[0m to end the script.
+echo Alternatively, type [96mQ[0m to end the script, or [96mG[0m to generate the registry files.
 SET /p process=Process name: 
 echo:
 
 :: Check if the user has entered Q to end the script
-IF /I "%process%" == "Q" (
-	GOTO Stop
-)
+IF /I "%process%" == "Q" (GOTO Stop)
 
+:: Check if the user has entered G to generate the registry files
+IF /I "%process%" == "G" (GOTO GenerateFiles)
+
+:ValidityCheck
 :: Check if the entered process name ends with .exe
 if "%process:~-4%" neq ".exe" (
 	echo [93mSOMETHING WENT WRONG[0m
@@ -38,43 +41,21 @@ if "%process:~-4%" neq ".exe" (
 	goto AddProgram
 )
 
-goto CpuPriority
-
-:AddAnotherProgram
-:: Ask user for another process
-echo [93mSET PROGRAM NAME[0m
-echo What is the process name of the program? The correct format is [96mname.exe[0m 
-echo Examples are: [1moverwatch.exe[0m / [1mhl2.exe[0m / [1mcactus.exe[0m / [1mRocketLeague.exe[0m 
-echo Alternatively, type [96mQ[0m to end the script, or [96mG[0m to generate the registry files.
-SET /p process=Process name: 
-echo:
-
-:ValidityCheck
-
-:: Check if the user has entered Q to end the script
-IF /I "%process%" == "Q" (
-	GOTO Stop
-)
-
-:: Check if the user has entered G to generate the registry files
-IF /I "%process%" == "G" (
-	GOTO GenerateFiles
-)
-
-:: Check if the entered process name ends with .exe
-if "%process:~-4%" neq ".exe" (
-	echo [93mSOMETHING WENT WRONG[0m
-	echo [91mERROR:[0m [96m%process%[0m is not a valid process name. A process needs to end with [96m.exe[0m
-	pause
-	echo.
-	goto AddAnotherProgram
-)
+:RegCheck
+:: Check to see if the registry already has a key entry for this process, and warn the user if so
+reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\%process%" > NUL 2>&1 || GOTO CpuPriority
+echo [93mWARNING: KEY FOR %process% ALREADY EXISTS[0m
+echo It looks like your registry already contains a key for the [96m%process%[0m process.
+echo Changing the value of the CPU priority shouldn't be an issue, but do not carelessly delete the entire [96m%process%[0m key.
+echo Do NOT run the [91mSPP_wipeSettings.reg[0m file for no reason, because this might [91mbreak your program permanently[0m.
+echo You are recommended to make a [1;4mbackup[0m of the current settings of your registry.
+pause
+echo.
 
 :CpuPriority
-
 :: Ask user for CPU priority, five possible values
-:: NOTE: The [1mREALTIME[0m cpu setting cannot be set through the registry and is therefore unavailable.
 echo [93mSET CPU PRIORITY[0m
+echo NOTE: The [1mREALTIME[0m cpu setting cannot be set through the registry and is therefore unavailable.
 echo At which priority should [96m%process%[0m run? Choose a number between [96m(1 - 5)[0m
 echo [1m1. Low[0m / [1m2. Below Normal[0m / [1m3. Normal[0m / [1m4. Above Normal[0m / [1m5. High[0m
 choice /c 12345 /n /m "CPU Priority= "
@@ -120,13 +101,8 @@ echo Is this correct? [96m(Y/N)[0m
 choice /n
 echo:
 
-IF ERRORLEVEL == 2 (
-	GOTO AddProgram
-)
-
-IF ERRORLEVEL == 1 (
-	GOTO WriteQueue
-)
+IF ERRORLEVEL == 2 (GOTO AddProgram)
+IF ERRORLEVEL == 1 (GOTO WriteQueue)
 
 :WriteQueue
 :: Write current program with priority setting to temporary files and append correct path
@@ -143,7 +119,7 @@ echo Do you wish to set another program? [96m(Y/N)[0m
 choice /n
 echo:
 IF ERRORLEVEL == 2 GOTO GenerateFiles
-IF ERRORLEVEL == 1 GOTO AddAnotherProgram
+IF ERRORLEVEL == 1 GOTO AddProgram
 
 :GenerateFiles
 cls
@@ -154,24 +130,25 @@ type wipe.temp > SPP_wipeSettings.reg
 
 echo The following three .reg files have been generated:
 echo [32m========================================================================================[0m
-echo [92msetPriority_setSettings.reg[0m - To import the settings into your registry
+echo [92mSPP_setSettings.reg[0m - To import the settings into your registry
 echo [32m----------------------------------------------------------------------------------------[0m
 type SPP_setSettings.reg
 echo [32m========================================================================================[0m
 echo:
 echo [33m========================================================================================[0m
-echo [93msetPriority_undoSettings.reg[0m - To remove the settings from your registry
+echo [93mSPP_undoSettings.reg[0m - To remove the settings from your registry
 echo [33m----------------------------------------------------------------------------------------[0m
 type SPP_undoSettings.reg
 echo [33m========================================================================================[0m
 echo:
 echo [31m========================================================================================[0m
-echo [91msetPriority_wipeSettings.reg[0m - To remove ALL CREATED KEYS from your registry
+echo [91mSPP_wipeSettings.reg[0m - To remove ALL CREATED KEYS from your registry
 echo          [97mWARNING: ONLY USE THIS FILE IF YOU KNOW WHAT YOU ARE DOING![0m
 echo [97mThis file will delete ALL created keys and does NOT account for any pre-existing keys![0m
 echo [31m----------------------------------------------------------------------------------------[0m
 type SPP_wipeSettings.reg
 echo [31m========================================================================================[0m
+
 :Stop
 :: Cleanup. Deleting temporary files and notify user of ended script
 del plus.temp minus.temp wipe.temp
