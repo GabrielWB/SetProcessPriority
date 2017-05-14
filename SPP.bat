@@ -1,14 +1,14 @@
 @echo off
 :: Clearing window and drawing ~~*FANCY*~~ information header
 cls
-echo [101;93mSetPriority.bat v1.0 - by GabrielWB (08/05/2017)[0m
-echo This script generates three .reg files to permanently set the CPU priority of specific programs.
+echo [101;93mSetPriority.bat v1.0 - by GabrielWB @ https://github.com/GabrielWB/SetProcessPriority)[0m
+echo This script generates three .reg files to permanently set and reset the CPU priority of specific programs.
 echo Use at your own risk and discretion. No warranties.
 echo:
 
 :: Filling variables with default values (for debugging purposes)
 SET process=nothing
-SET priority=2
+SET priority=9
 SET priorityName=nothing
 
 :: Create three temporary files and add default registry file header and blank line
@@ -34,7 +34,7 @@ IF /I "%process%" == "G" (GOTO GenerateFiles)
 :ValidityCheck
 :: Check if the entered process name ends with .exe
 if "%process:~-4%" neq ".exe" (
-	echo [93mSOMETHING WENT WRONG[0m
+	echo [93mINVALID PROCESS NAME[0m
 	echo [91mERROR:[0m [96m%process%[0m is not a valid process name. A process needs to end with [96m.exe[0m
 	pause
 	echo.
@@ -47,15 +47,16 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image
 echo [93mWARNING: KEY FOR %process% ALREADY EXISTS[0m
 echo It looks like your registry already contains a key for the [96m%process%[0m process.
 echo Changing the value of the CPU priority shouldn't be an issue, but do not carelessly delete the entire [96m%process%[0m key.
-echo Do NOT run the [91mSPP_wipeSettings.reg[0m file for no reason, because this might [91mbreak your program permanently[0m.
+echo Do [1mNOT[0m run the [91mSPP_wipeSettings.reg[0m file for no reason, because this might [91mbreak your program permanently[0m.
 echo You are recommended to make a [1;4mbackup[0m of the current settings of your registry.
 pause
 echo.
 
 :CpuPriority
 :: Ask user for CPU priority, five possible values
+:: NOTE: The "realtime" cpu setting cannot be set through the registry and is therefore unavailable.
+:: Setting a process to realtime isn't recommended anyway because it can compromise system stability.
 echo [93mSET CPU PRIORITY[0m
-echo NOTE: The [1mREALTIME[0m cpu setting cannot be set through the registry and is therefore unavailable.
 echo At which priority should [96m%process%[0m run? Choose a number between [96m(1 - 5)[0m
 echo [1m1. Low[0m / [1m2. Below Normal[0m / [1m3. Normal[0m / [1m4. Above Normal[0m / [1m5. High[0m
 choice /c 12345 /n /m "CPU Priority= "
@@ -152,6 +153,6 @@ echo [31m======================================================================
 :Stop
 :: Cleanup. Deleting temporary files and notify user of ended script
 del plus.temp minus.temp wipe.temp
-echo [96mThe script has ended[0m
+echo [96m=== The script has ended ===[0m
 pause
 exit
